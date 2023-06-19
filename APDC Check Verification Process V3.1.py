@@ -52,7 +52,7 @@ def abrir_archivos_quickbooks():
         entrada_quickbooks.insert(0, "<<>> ".join(archivos))
 
 def show_info_Quickbooks_report():
-     messagebox.showinfo("Info", "Select the report files extracted from Quickbooks with check transactions\n\nEach file must represent an account, which will be searched in the TD Bank transactions report\n\nThis version uses the report extracted from Quickbooks Reports - Memorized Reports - Check Positive Pay")
+     messagebox.showinfo("Info", "Select the report files extracted from Quickbooks with check transactions\n\nEach file must represent an account, which will be searched in the TD Bank transactions report\n\nThis version uses the report extracted from Quickbooks Reports - Memorized Reports - Zuleika")
 
     #  text = "\n\nIMPORTANT: The exported Quickbooks file must contain only transactions that have not been verified, that is, when exporting the report, filtering must be done by check number from the last check that has not yet been processed"
 
@@ -155,7 +155,7 @@ def procesar():
             return
 
         try:
-            if not (str(tmp_dt.iat[0, 4]) == "Date" and str(tmp_dt.iat[0, 6]) == "Num" and str(tmp_dt.iat[0, 8]) == "Name" and str(tmp_dt.iat[0, 10]) == "Credit"):
+            if not (str(tmp_dt.iat[0, 4]) == "Type" and str(tmp_dt.iat[0, 6]) == "Date" and str(tmp_dt.iat[0, 8]) == "Num" and str(tmp_dt.iat[0, 10]) == "Name" and str(tmp_dt.iat[0, 12]) == "Debit" and str(tmp_dt.iat[0, 14]) == "Credit" and str(tmp_dt.iat[0, 16])) == "Balance":
                 messagebox.showerror("Error", "The Quickbooks report '" + file.rsplit('/', 1)[1] +"' is not in the correct format. \n\nPlease check the Quickbooks report and try again")
                 #Ocultamos barra de progreso y limpiamos caja de texto
                 clean(clean_inputs=False)
@@ -255,7 +255,7 @@ def procesar():
         ##################################### Formato reportes
 
         # Eliminar columnas
-        columnas_a_eliminar_qb_report = [0,1,2,3,5,7,9]  # Índices de las columnas a eliminar
+        columnas_a_eliminar_qb_report = [0,1,2,3,4,5,7,9,11,12,13,15,16]  # Índices de las columnas a eliminar
         columnas_extras_a_eliminar = 4 #A partir del este numero se eliminaran
         qb_report = qb_report.drop(qb_report.columns[columnas_a_eliminar_qb_report], axis=1)
 
@@ -329,7 +329,7 @@ def procesar():
         while try_again:
             try:
                 qb_report.to_excel(f'{OUTPUT_DIRECTORY}/{account_number_bank_report}/{DATA_BEFORE_PROCESSING_DIRECTORY}/{FORMATTED_QB_REPORT_NAME}', index=False, header=None)
-
+            
                 try_again = False
             except PermissionError:
                 
@@ -338,20 +338,19 @@ def procesar():
                 if not rsp:
                     clean(False)
                     return
-                
+
             except Exception as e:
                 messagebox.showerror("Error", str(e) + "\n\nFailed to export file '" + FORMATTED_QB_REPORT_NAME + "'")
                 #Ocultamos barra de progreso y limpiamos caja de texto
                 clean(False)
-                return   
-            
+                return
+        
         try_again = True
-        while try_again:            
+        while try_again:
             try:
                 bank_report.to_excel(f'{OUTPUT_DIRECTORY}/{account_number_bank_report}/{DATA_BEFORE_PROCESSING_DIRECTORY}/{FORMATTED_BANK_REPORT_NAME}', index=False, header=None)
 
                 try_again = False
-
             except PermissionError:
                 
                 rsp = messagebox.askretrycancel("Permission error", f"Could not update file {FORMATTED_BANK_REPORT_NAME} \nIf you have this file open please close it \n\nDo you want to try again?")
@@ -359,14 +358,13 @@ def procesar():
                 if not rsp:
                     clean(False)
                     return
-                
+
             except Exception as e:
                 messagebox.showerror("Error", str(e) + "\n\nFailed to export file '" + FORMATTED_BANK_REPORT_NAME + "'")
                 #Ocultamos barra de progreso y limpiamos caja de texto
                 clean(False)
-                return 
-            
-                
+                return
+        
         #Agregamos columna que identifica de donde proviene la transaccion
         qb_report.insert(4, 'FROM', "QUICKBOOKS REPORT")
         
@@ -458,6 +456,7 @@ def procesar():
         
         #Actualizamos la barra de progreso
         update_progress_bar(1/2,format_reports)
+
         try:
             # Formatear las fechas en el DataFrame
             current_transactions_pending_unprocessed[0] = current_transactions_pending_unprocessed[0].dt.strftime('%m/%d/%Y')
@@ -474,13 +473,12 @@ def procesar():
             return
 
         try_again = True
-        while try_again:            
+        while try_again:
             try:
                 #Guardamos las transacciones unicas y pendientes
                 current_transactions_pending_unprocessed.to_excel(f'{OUTPUT_DIRECTORY}/{account_number_bank_report}/{DATA_BEFORE_PROCESSING_DIRECTORY}/{PENDING_TRANSACTIONS_BEFORE_PROCESSING_NAME}', index=False, header=False)  
-
-                try_again = False
                 
+                try_again = False
             except PermissionError:
                 
                 rsp = messagebox.askretrycancel("Permission error", f"Could not update file {PENDING_TRANSACTIONS_BEFORE_PROCESSING_NAME} \nIf you have this file open please close it \n\nDo you want to try again?")
@@ -488,13 +486,13 @@ def procesar():
                 if not rsp:
                     clean(False)
                     return
-                
+
             except Exception as e:
                 messagebox.showerror("Error", str(e) + "\n\nFailed to export file '" + PENDING_TRANSACTIONS_BEFORE_PROCESSING_NAME + "'")
                 #Ocultamos barra de progreso y limpiamos caja de texto
                 clean(False)
-                return             
-
+                return        
+        
         try_again = True
         while try_again:
             try:
@@ -505,9 +503,9 @@ def procesar():
 
                     duplicate_transactions.to_excel(f'{OUTPUT_DIRECTORY}/{account_number_bank_report}/{TRANSACTIONS_TO_REVIEW_DIRECTORY}/{DUPLICATE_PENDING_TRANSACTIONS_NAME}', header=None, index=False)  
                     print(f"\tDuplicate pending transactions file has been created\n")
-                
-                
+
                 try_again = False
+
             except PermissionError:
                 
                 rsp = messagebox.askretrycancel("Permission error", f"Could not update file {DUPLICATE_PENDING_TRANSACTIONS_NAME} \nIf you have this file open please close it \n\nDo you want to try again?")
@@ -520,9 +518,9 @@ def procesar():
                 #Ocultamos barra de progreso y limpiamos caja de texto
                 clean(False)
                 return
-            
+
         try_again = True
-        while try_again:  
+        while try_again:
             try:
                 #Guardamos las transacciones void en un archivo aparte
                 if(not void_transactions.empty):
@@ -531,8 +529,9 @@ def procesar():
 
                     void_transactions.to_excel(f'{OUTPUT_DIRECTORY}/{account_number_bank_report}/{TRANSACTIONS_TO_REVIEW_DIRECTORY}/{VOID_TRANSACTIONS_NAME}', header=None, index=False)  
                     print(f"\tVoid transactions file has been created\n")
-
+                
                 try_again = False
+
             except PermissionError:
                 
                 rsp = messagebox.askretrycancel("Permission error", f"Could not update file {VOID_TRANSACTIONS_NAME} \nIf you have this file open please close it \n\nDo you want to try again?")
@@ -545,7 +544,7 @@ def procesar():
                 #Ocultamos barra de progreso y limpiamos caja de texto
                 clean(False)
                 return
-        
+            
         ventana.update_idletasks()
 
         #Eliminamos la columna que agregamos para identificar desde donde proviene la transaccion
@@ -584,7 +583,7 @@ def procesar():
         #Le damos formato a bank_transactions_pending
         columns_to_delete = [0,1,2,3,4,8]
         bank_transactions_pending = bank_transactions_pending.drop(bank_transactions_pending.columns[columns_to_delete], axis=1)
-        
+
         try_again = True
         while try_again:
             try:
@@ -596,8 +595,8 @@ def procesar():
                     bank_transactions_pending.to_excel(f'{OUTPUT_DIRECTORY}/{account_number_bank_report}/{TRANSACTIONS_TO_REVIEW_DIRECTORY}/{BANK_PENDING_TRANSACTIONS_NAME}', index=False,header=None)  
                     print(f"\tBank pending transactions file has been created\n")
 
-
                 try_again = False
+                
             except PermissionError:
                 
                 rsp = messagebox.askretrycancel("Permission error", f"Could not update file {BANK_PENDING_TRANSACTIONS_NAME} \nIf you have this file open please close it \n\nDo you want to try again?")
@@ -634,12 +633,12 @@ def procesar():
         transactions_pending_processed['0_x'] = transactions_pending_processed['0_x'].dt.strftime('%m/%d/%Y')
 
         try_again = True
-        while try_again:            
+        while try_again:        
             try:
                 transactions_pending_processed.to_excel(f'{OUTPUT_DIRECTORY}/{account_number_bank_report}/{PROCESSED_DATA_DIRECTORY}/{PENDING_TRANSACTIONS_PROCESSED_NAME}', index=False, header=None)  
-
-                try_again = False
                 
+                try_again = False
+
             except PermissionError:
                 
                 rsp = messagebox.askretrycancel("Permission error", f"Could not update file {PENDING_TRANSACTIONS_PROCESSED_NAME} \nIf you have this file open please close it \n\nDo you want to try again?")
@@ -647,13 +646,13 @@ def procesar():
                 if not rsp:
                     clean(False)
                     return
-                
+
             except Exception as e:
                 messagebox.showerror("Error", str(e) + "\n\nFailed to export file '" + PENDING_TRANSACTIONS_PROCESSED_NAME + "'")
                 #Ocultamos barra de progreso y limpiamos caja de texto
                 clean(False)
-                return 
-        
+                return
+
         #Agregamos la columnas
         transactions_pending_processed.insert(0, 'STATUS', "PENDING")
         transactions_pending_processed.insert(3, 'MATCH', "")
@@ -679,15 +678,13 @@ def procesar():
         confirmed_transactions.insert(2, 'MATCH', "")
         confirmed_transactions.insert(3, 'QB COMMENTS', "")
 
-
         try_again = True
-        while try_again:            
-            try:
+        while try_again:
+            try:    
                 # Guardamos las filas coincidentes
                 confirmed_transactions.to_excel(f'{OUTPUT_DIRECTORY}/{account_number_bank_report}/{PROCESSED_DATA_DIRECTORY}/{CONFIRMED_TRANSACTIONS_NAME}', index=False, header=None)  
 
                 try_again = False
-                
             except PermissionError:
                 
                 rsp = messagebox.askretrycancel("Permission error", f"Could not update file {CONFIRMED_TRANSACTIONS_NAME} \nIf you have this file open please close it \n\nDo you want to try again?")
@@ -695,12 +692,12 @@ def procesar():
                 if not rsp:
                     clean(False)
                     return
-                
+
             except Exception as e:
                 messagebox.showerror("Error", str(e) + "\n\nFailed to export file '" + CONFIRMED_TRANSACTIONS_NAME + "'")
                 #Ocultamos barra de progreso y limpiamos caja de texto
                 clean(False)
-                return 
+                return
 
         #Agregamos la columna status
         transactions_processed.insert(0, 'STATUS', "READY")
@@ -722,13 +719,13 @@ def procesar():
         transactions_processed.columns = ['STATUS', 'QB DATE', 'QB NUMBER', 'MATCH', 'QB COMMENTS', 'NAME', 'QB AMOUNT', 'BANK DATE', 'BANK NUMBER', 'BANK AMOUNT','TEST #', 'TEST AMOUNT', 'BANK COMMENTS', 'EXTRA']
 
         try_again = True
-        while try_again:            
+        while try_again:
             try:
                 #Guardamos archivo con todos los datos finales
                 transactions_processed.to_excel(f'{OUTPUT_DIRECTORY}/{account_number_bank_report}/{PROCESSED_DATA_DIRECTORY}/{RESULT_TRANSACTIONS_PROCESSED_NAME}', index=False)  
 
                 try_again = False
-                
+
             except PermissionError:
                 
                 rsp = messagebox.askretrycancel("Permission error", f"Could not update file {RESULT_TRANSACTIONS_PROCESSED_NAME} \nIf you have this file open please close it \n\nDo you want to try again?")
@@ -736,13 +733,13 @@ def procesar():
                 if not rsp:
                     clean(False)
                     return
-                
+
             except Exception as e:
                 messagebox.showerror("Error", str(e) + "\n\nFailed to export file '" + RESULT_TRANSACTIONS_PROCESSED_NAME + "'")
                 #Ocultamos barra de progreso y limpiamos caja de texto
                 clean(False)
-                return 
-        
+                return
+            
         #Actualizamos la barra de progreso
         update_progress_bar(1/2,format_reports)
         
