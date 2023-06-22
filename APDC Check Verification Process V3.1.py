@@ -28,6 +28,9 @@ PENDING_TRANSACTIONS_PAGE_MAIN_FILE_NAME = " QB PENDING"
 CONFIRMED_TRANSACTIONS_PAGE_MAIN_FILE_NAME = " QB CONFIRMED"
 BANK_PENDING_TRANSACTIONS_NAME = "BANK PENDING TRANSACTIONS.xlsx"
 
+#Variable global para manejar que no se ejecute en simultaneo esta funcion
+execution_in_progress = False
+
 # Crear una clase personalizada para redirigir la salida a la caja de texto
 class TextRedirector:
     def __init__(self, text_widget):
@@ -80,6 +83,10 @@ def procesar():
     #Limpiamos la caja de texto de informacion
     clean(clean_inputs=False)
     
+    #Variable global para manejar que no se ejecute en simultaneo esta funcion
+    global execution_in_progress
+    execution_in_progress = True
+
     #Variables que manejan la barra de progreso
     reading_files = 3
     format_reports = 2
@@ -94,12 +101,15 @@ def procesar():
     #Tratamos si los archivos estan vacios
     if archivo_bank == "": 
         messagebox.showerror("Error","No file has been selected as bank report")
+        execution_in_progress = False
         return
     if archivos_quickbooks == "":
         messagebox.showerror("Error", "No file selected as Quickbooks report")
+        execution_in_progress = False
         return
     if archivo_central == "":
         messagebox.showerror("Error", "No file selected as main file")
+        execution_in_progress = False
         return
     
     archivo_central_name = archivo_central.rsplit('/', 1)[1]
@@ -977,6 +987,8 @@ def clean(clean_inputs = True):
     toggle_progress_bar(False)
 
 def toggle_progress_bar(band):
+    global execution_in_progress
+
     if band:
         #Barra de progreso
         barra_progreso_label.place(relx=0.5, rely=0.5, anchor="center")
@@ -987,15 +999,23 @@ def toggle_progress_bar(band):
         barra_progreso_label.config(text="")
         barra_progreso_label.place_forget()
         barra_progreso.place_forget()
+        execution_in_progress = False
     
     ventana.update_idletasks()
 
 def ejecutar_hilo():
-    # Crear un objeto Thread y pasarle la función procesar como objetivo
-    hilo_procesar = threading.Thread(target=procesar)
 
-    # Iniciar la ejecución del hilo
-    hilo_procesar.start()
+    global execution_in_progress
+
+    if execution_in_progress:
+        messagebox.showwarning("Warning","The execution is already in progress \n\nPlease wait for this process to finish to start another one")
+    else:
+
+        # Crear un objeto Thread y pasarle la función procesar como objetivo
+        hilo_procesar = threading.Thread(target=procesar)
+
+        # Iniciar la ejecución del hilo
+        hilo_procesar.start()
 
     
 # Crear la ventana principal
