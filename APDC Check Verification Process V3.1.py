@@ -19,6 +19,7 @@ FORMATTED_BANK_REPORT_NAME = "BANK REPORT.xlsx"
 FORMATTED_QB_REPORT_NAME = "QUICKBOOKS REPORT.xlsx"
 PENDING_TRANSACTIONS_BEFORE_PROCESSING_NAME = "PENDING TRANSACTIONS BEFORE PROCESSING.xlsx"
 DUPLICATE_PENDING_TRANSACTIONS_NAME = "DUPLICATE PENDING TRANSACTIONS.xlsx"
+DUPLICATE_BANK_REPORT_TRANSACTIONS_NAME = "DUPLICATE BANK REPORT TRANSACTIONS.xlsx"
 VOID_TRANSACTIONS_NAME = "VOID TRANSACTIONS.xlsx"
 CONFIRMED_TRANSACTIONS_NAME = "CONFIRMED TRANSACTIONS.xlsx"
 PENDING_TRANSACTIONS_PROCESSED_NAME = "PENDING TRANSACTIONS PROCESSED.xlsx"
@@ -320,6 +321,47 @@ def procesar():
             clean(False)
             return
 
+        ##Extraemos duplicados del bank report
+        # Aplicar la transformación a las columnas a entero para que realice correctamente el drop_duplicates
+        bank_report[bank_report.columns[2]] = bank_report[bank_report.columns[2]].astype(int)
+
+        # Extraemos un df con True en las filas duplicadas y False en las que no
+        duplicate_transactions_bank_report = bank_report.duplicated(subset=[bank_report.columns[2]],keep=False)
+        
+        # Extraer filas duplicadas
+        duplicate_transactions_bank_report = bank_report[duplicate_transactions_bank_report]
+        
+        # Ordenamos por numero de transaccion
+        duplicate_transactions_bank_report = duplicate_transactions_bank_report.sort_values(by=[duplicate_transactions_bank_report.columns[2]],axis=0)
+
+        #Eliminamos duplicados con el mismo nro de transaccion y el mismo monto (dejamos una sola transaccion)
+        bank_report.drop_duplicates(inplace=True,subset=[bank_report.columns[2]],keep=False)
+
+        try_again = True
+        while try_again:
+            try:
+                #Guardamos los duplicados del reporte del banco en un archivo aparte
+                if(not duplicate_transactions_bank_report.empty):
+                    #Creamos el directorio
+                    os.makedirs(os.path.join(OUTPUT_DIRECTORY,account_number_bank_report,TRANSACTIONS_TO_REVIEW_DIRECTORY), exist_ok=True)
+
+                    duplicate_transactions_bank_report.to_excel(f'{OUTPUT_DIRECTORY}/{account_number_bank_report}/{TRANSACTIONS_TO_REVIEW_DIRECTORY}/{DUPLICATE_BANK_REPORT_TRANSACTIONS_NAME}', header=None, index=False)  
+                    print(f"\tDuplicate bank report transactions file has been created\n")
+                
+                
+                try_again = False
+            except PermissionError:
+                
+                rsp = messagebox.askretrycancel("Permission error", f"Could not update file {DUPLICATE_BANK_REPORT_TRANSACTIONS_NAME} \nIf you have this file open please close it \n\nDo you want to try again?")
+
+                if not rsp:
+                    clean(False)
+                    return
+            except Exception as e:
+                messagebox.showerror("Error", str(e) + "\n\nFailed to export file '" +  DUPLICATE_BANK_REPORT_TRANSACTIONS_NAME + "'")
+                #Ocultamos barra de progreso y limpiamos caja de texto
+                clean(False)
+                return
         #Actualizamos la barra de progreso
         update_progress_bar(1/2,format_reports)
 
@@ -747,7 +789,6 @@ def procesar():
         update_progress_bar(1/2,format_reports)
         
         time.sleep(1)
-
         #Actualizamos label barra de progreso
         barra_progreso_label.config(text=f"Updating {archivo_central_name}")
         #Reiniciamos barra de progreso

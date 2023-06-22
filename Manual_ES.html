@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Manual de Uso - APDC Proceso de Verificación de Cheques</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                line-height: 1.5;
+                margin: 30px;
+            }
+            h1, h2, h3 , h4{
+                color: #333;
+            }
+            h2 {
+                margin-top: 20px;
+            }
+            h3 {
+                margin-top: 10px;
+            }
+            p {
+                color: #404040;
+            }
+            code {
+                background-color: #f5f5f5;
+                padding: 2px 5px;
+                font-family: Consolas, monospace;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Manual de Uso - APDC Proceso de Verificación de Cheques</h1>
+        <h2>Descripción</h2>
+        <p>APDC Proceso de Verificación de Cheques es una aplicación construida en Python y Tkinter que automatiza el proceso de verificación de transacciones mediante la comparación de datos en archivos exportados como reportes de Quickbooks y TD Bank.</p>
+
+        <h2>Requisitos del sistema</h2>
+        <ul>
+            <li>Para la ejecución del programa no se requiere ningún requerimiento de software específico. Sin embargo, para un funcionamiento correcto y obtener los resultados esperados, se necesitan las siguientes condiciones:</li>
+            <li>Reporte "Check Positive Pay" exportado desde Quickbooks</li>
+            <ul>
+                <li>Es importante que el reporte exportado solo contenga las transacciones a procesar y no transacciones ya procesadas. Para lograr esto, se debe filtrar el reporte desde un número posterior al último número de cheque procesado. El número del último cheque procesado se puede encontrar en el archivo central en la hoja correspondiente a "pendientes" de cada cuenta, verificando la última fila de las transacciones. Si se incluyen transacciones ya procesadas y el software no las detecta como coincidencias, se considerarán como transacciones pendientes.</li>
+                <li>Los datos del reporte deben estar en una hoja llamada "Sheet1". Por lo general, el archivo se exporta con esta configuración predeterminada.</li>
+                <li>El archivo debe ser de tipo .XLSX, es decir, una hoja de cálculo de Excel en la versión 2007 o posterior.</li>
+                <li>Se debe exportar un archivo por cada cuenta que se desea procesar.</li>
+            </ul>
+            <li>Archivo principal para el registro de las transacciones procesadas</li>
+            <ul>
+                <li>Este archivo central registra todas las transacciones verificadas, pendientes y otros tipos de transacciones, como anulaciones, etc.</li>
+                <li>El archivo se utiliza para extraer las transacciones pendientes y se sobrescribe con la nueva información procesada.</li>
+                <li>Es importante tener en cuenta el formato utilizado por el software para detectar las páginas de las cuales debe extraer y modificar la información. Por ejemplo, para las transacciones confirmadas de la cuenta que termina en 2674, se utiliza el formato "2674 QB CONFIRMED". Para las transacciones pendientes por confirmar de la cuenta que termina en 2674, se utiliza el formato "2674 QB PENDING". Es necesario crear estas dos hojas con sus respectivos datos al agregar una nueva cuenta al procesamiento.</li>
+                <li>No se debe modificar la estructura y formato de la hoja donde se almacenan las transacciones pendientes, ya que esto puede generar errores al intentar extraer la información. Si se desea agregar una nueva cuenta, se debe seguir el mismo formato establecido.</li>
+                <li>Es necesario que este archivo se mantenga cerrado cuando se este ejecutando el procesamiento de los datos ya que el software realiza operaciones de lectura y escritura en el mismo.</li>
+            </ul>
+            <li>Reporte multicuenta exportado desde TD Bank</li>
+            <ul>
+                <li>Este reporte se exporta desde la plataforma "My TD Bank" y se filtra por un rango de fechas según las transacciones que se deseen cruzar con los datos extraídos de Quickbooks.</li>
+            </ul>
+        </ul>
+
+        <h2>Instalación</h2>
+        <ul>
+            <li>No es necesario realizar ninguna instalación.</li>
+        </ul>
+
+        <h2>Ejecución</h2>
+        <ul>
+            <li>Hacer doble clic en el archivo ejecutable proporcionado.</li>
+        </ul>
+
+        <h2>Funcionalidades principales</h2>
+        <h3>Selección de archivos</h3>
+        <ul>
+            <li>En la interfaz gráfica, se muestran tres secciones: Quickbooks Transactions Reports", "Main File" y "TD Bank Transaction Report".</li>
+            <li>En la sección "Quickbooks Transactions Reports", se pueden seleccionar varios archivos de tipo XLSX (Excel versión 2007 o posterior) haciendo clic en el botón "Select files". Aquí se deben seleccionar todos los reportes (uno por cuenta) de tipo "Check Positive Pay" extraídos de Quickbooks que se deseen procesar.</li>
+            <li>En la sección "Main File", se puede seleccionar un único archivo de tipo XLSX (Excel versión 2007 o posterior) haciendo clic en el botón "Select file". Aquí se seleccionará el archivo central que contiene el registro de las transacciones verificadas, pendientes, etc.</li>
+            <li>En la sección "TD Bank Transaction Report", se puede seleccionar un único archivo de tipo XLSX (Excel versión 2007 o posterior) o CSV haciendo clic en el botón "Select file". Al abrir la ventana de selección de archivos, se debe elegir el tipo de archivo deseado en la parte inferior derecha de la ventana.</li>
+            <li>Cada una de estas secciones tiene un boton llamado "info". Al hacer clic en este boton se va a mostrar una breve explicacion sobre cada sección.</li>
+        </ul>
+
+        <h2>Procesamiento de archivos</h2>
+        <p>El procesamiento de archivos se lleva a cabo siguiendo los pasos descritos a continuación:</p>
+        <h3>Selección de archivos</h3>
+        <ul>
+            <li>Seleccione los archivos necesarios y luego haga clic en el botón "Start Process" para iniciar el procesamiento.</li>
+        </ul>
+        <h3>Progreso y mensajes</h3>
+        <ul>
+            <li>Durante el procesamiento, se mostrará una barra de progreso que proporciona información general sobre el proceso en curso.</li>
+            <li>En la parte inferior de la interfaz, hay una caja de texto que mostrará mensajes relevantes sobre el proceso y los resultados obtenidos.</li>
+        </ul>
+        <h3>Situaciones durante el procesamiento</h3>
+        <ol>
+            <li>Detección de transacciones pendientes duplicadas: Durante la unificación de las transacciones pendientes del archivo central con las transacciones del reporte de Quickbooks, se pueden encontrar transacciones duplicadas.</li>
+            <li>Detección de transacciones del reporte del banco duplicadas: Puede ocurrir la situacion en la que el reporte del banco traiga consigo transacciones duplicadas.</li>
+            <li>Detección de transacciones nulas o vacías: Es posible que el reporte de Quickbooks contenga transacciones sin monto especificado.</li>
+            <li>Detección de transacciones presentes en el reporte bancario pero sin coincidencias en los reportes de Quickbooks: Si se encuentran transacciones en el reporte bancario que no coinciden con ninguna transacción en los reportes de Quickbooks.</li>
+            <li>NOTA: Cuando estas situaciones son detectadas el software exporta las transacciones involucradas en archivos especificos, cada uno de estos resultados son explicados en detalle en el apartado "resultados" de este manual.</li>
+        </ol>
+        <h3>Procesamiento de los datos</h3>
+        <p>A continuación se menciona el ciclo que ejecuta el software para el procesamiento de los datos.</p>
+        <ol>
+            <li>Lectura de los archivos seleccionados.</li>
+            <li>A continuación, se ejecutan los siguientes subprocesos en un bucle para cada cuenta:</li>
+            <ol>
+                <li>Creación y exportación de un formato estandarizado de los reportes utilizados.</li>
+                <li>Extracción de las transacciones pendientes registradas en el archivo central.</li>
+                <li>Unificación de las transacciones pendientes con las transacciones del reporte de Quickbooks.</li>
+                <li>Búsqueda de coincidencias entre las transacciones unificadas y las transacciones del reporte extraído de TD Bank.</li>
+                <li>Exportación de archivos con los resultados obtenidos.</li>
+            </ol>
+            <li>Actualización y guardado del archivo principal.</li>
+        </ol>
+
+        <h3>Limpieza de la caja de texto</h3>
+        <ul>
+            <li>Para limpiar el contenido de la caja de texto y los archivos seleccionados, se puede hacer clic en el botón "Clean" que se encuentra en la parte inferior de la ventana.</li>
+        </ul>
+
+        <h3>Resultados</h3>
+
+        <p>El software genera los siguientes resultados al procesar las cuentas:</p>
+
+        <h4>Carpeta "OUTPUT"</h4>
+
+        <p>En el directorio donde se encuentra el archivo ejecutable, se crea una carpeta llamada "OUTPUT". Esta carpeta contiene subcarpetas correspondientes a cada cuenta procesada. Dentro de cada carpeta se generan tres (3) subcarpetas:</p>
+
+        <h4>Carpeta "DATA BEFORE PROCESSING"</h4>
+
+        <p>En esta carpeta se encuentran archivos exportados que contienen datos sin procesar. Los archivos disponibles son:</p>
+
+        <ul>
+            <li>"BANK REPORT.xlsx": Este archivo contiene la información del reporte bancario ingresado en la interfaz, pero en un formato específico que solo incluye los datos necesarios para el procesamiento de esa cuenta en particular.</li>
+            <li>"QUICKBOOKS REPORT.xlsx": Este archivo contiene la información del reporte de Quickbooks ingresado en la interfaz, pero en un formato específico que solo incluye los datos necesarios para el procesamiento.</li>
+            <li>"PENDING TRANSACTIONS BEFORE PROCESSING.xlsx": Este archivo contiene las transacciones pendientes antes de su procesamiento. Incluye tanto las transacciones del reporte de Quickbooks como las transacciones pendientes encontradas en el archivo central. Estas transacciones serán comparadas con las transacciones del reporte bancario.</li>
+        </ul>
+        <h4>Carpeta "PROCESSED DATA"</h4>
+
+        <p>En esta carpeta se encuentran archivos exportados con datos ya procesados. Los archivos disponibles son:</p>
+
+        <ul>
+            <li>"CONFIRMED TRANSACTIONS.xlsx": Este archivo contiene las transacciones confirmadas, es decir, las transacciones pendientes que encontraron coincidencia en el reporte bancario.</li>
+            <li>"PENDING TRANSACTIONS PROCESSED.xlsx": Este archivo contiene las transacciones pendientes resultantes, es decir, las transacciones que no encontraron coincidencia en el reporte bancario.</li>
+            <li>"RESULT - TRANSACTIONS PROCESSED.xlsx": Este archivo contiene todas las transacciones procesadas, tanto las transacciones confirmadas como las transacciones pendientes, en un formato más legible.</li>
+        </ul>
+
+        <h4>Carpeta "TRANSACTIONS TO REVIEW"</h4>
+
+        <p>Esta carpeta es muy importante, en ella se encuentran archivos exportados con datos ya procesados que deben ser revisados por el usuario. Los archivos resultantes dada la situación son:</p>
+
+        <ul>
+            <li>"DUPLICATE BANK REPORT TRANSACTIONS.xlsx": Este archivo contiene las transacciones identificadas como duplicadas en las transacciones contenidas en el reporte del banco.</li>
+            <li>"DUPLICATE PENDING TRANSACTIONS.xlsx": Este archivo contiene las transacciones pendientes identificadas como duplicadas, incluyendo información sobre el origen de cada transacción.</li>
+            <li>"VOID TRANSACTIONS.xlsx": Este archivo contiene las transacciones identificadas como nulas, es decir, aquellas que no tenían un monto especificado.</li>
+            <li>"BANK PENDING TRANSACTIONS.xlsx": Este archivo contiene las transacciones del reporte bancario que no encontraron coincidencia con ninguna transacción pendiente.</li>
+        </ul>
+
+        <h4>Nota</h4>
+        <ul>
+            <li>Cada vez que se ejecute el procesamiento de datos, todos los archivos resultantes de este nuevo proceso van a sobrescribir los archivos creados en procesos anteriores.</li>
+        </ul>
+
+        <h4>Archivo Central</h4>
+        <ul>
+            <li>El archivo central se actualizará con los resultados obtenidos, insertando los datos correspondientes en las hojas designadas. Después de procesar toda la información, las transacciones confirmadas se añadirán a la hoja de transacciones confirmadas correspondiente a la cuenta en cuestión, de la misma manera que las transacciones pendientes.</li>
+        </ul>
+
+        <h2>Notas adicionales</h2>
+        <ul>
+            <li>Es importante tomar en cuenta que esta herramienta en ningun momento evalua las transacciones que anteriormente fueron confirmadas. Esta herramienta trabaja unica y exclusivamente con los datos extraidos de los archivos adjuntos y en el caso del archivo central, solo extrae y utiliza las transacciones pendientes que van quedando en cada procesamiento.</li>
+            <li>Asegúrese de tener los archivos necesarios en el formato correcto antes de comenzar el procesamiento.</li>
+            <li>Si se experimenta algún problema o error, verifique que los archivos seleccionados sean válidos y cumplan con los requisitos esperados.</li>
+        </ul>
+    </body>
+</html>

@@ -161,3 +161,9 @@ cython_debug/
 
 #OUTPUT directory 
 /OUTPUT/
+
+#Executables
+*.exe
+
+#Excel files
+*.xlsx

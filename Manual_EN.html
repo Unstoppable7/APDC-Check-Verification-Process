@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Usage Manual - APDC Check Verification Process</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        line-height: 1.5;
+        margin: 30px;
+    }
+    h1, h2, h3, h4 {
+        color: #333;
+    }
+    h2 {
+        margin-top: 20px;
+    }
+    h3 {
+        margin-top: 10px;
+    }
+    p {
+        color: #404040;
+    }
+    code {
+        background-color: #f5f5f5;
+        padding: 2px 5px;
+        font-family: Consolas, monospace;
+    }
+</style>
+</head>
+<body>
+<h1>Usage Manual - APDC Check Verification Process</h1>
+<h2>Description</h2>
+<p>APDC Check Verification Process is a Python and Tkinter-based application that automates the process of verifying transactions by comparing data in files exported as Quickbooks and TD Bank reports.</p>
+<h2>System Requirements</h2>
+<ul>
+    <li>For the execution of the program, no specific software requirement is required. However, to ensure proper functionality and expected results, the following conditions are required:</li>
+    <li>"Check Positive Pay" report exported from Quickbooks</li>
+    <ul>
+        <li>It is important that the exported report only contains the transactions to be processed and not already processed transactions. To achieve this, the report should be filtered starting from a number higher than the last processed check number. The number of the last processed check can be found in the central file on the corresponding sheet for each account, checking the last row of the transactions. If already processed transactions are included and the software does not detect them as matches, they will be considered as pending transactions.</li>
+        <li>The report data should be on a sheet named "Sheet1". Typically, the file is exported with this default configuration.</li>
+        <li>The file should be in .XLSX format, i.e., an Excel spreadsheet in version 2007 or later.</li>
+        <li>One file should be exported for each account to be processed.</li>
+    </ul>
+    <li>Main file for recording processed transactions</li>
+    <ul>
+        <li>This central file records all verified, pending, and other types of transactions, such as voided transactions, etc.</li>
+        <li>The file is used to extract pending transactions and is overwritten with the new processed information.</li>
+        <li>It is important to note the format used by the software to identify the pages from which it should extract and modify the information. For example, for confirmed transactions from the account ending in 2674, the "2674 QB CONFIRMED" format is used. For pending-to-confirm transactions from the account ending in 2674, the "2674 QB PENDING" format is used. These two sheets with their respective data must be created when adding a new account for processing.</li>
+        <li>The structure and format of the sheet where pending transactions are stored should not be modified, as this may result in errors when attempting to extract the information. If you want to add a new account, follow the established format.</li>
+        <li>This file must remain closed when the data processing is running since the software performs read and write operations on it.</li>
+    </ul>
+    <li>Multi-account report exported from TD Bank</li>
+    <ul>
+        <li>This report is exported from the "My TD Bank" platform and is filtered by a range of dates according to the transactions that you want to cross with the data extracted from Quickbooks.</li>
+    </ul>
+</ul>    
+<h2>Installation</h2>
+<ul>
+    <li>No installation is required.</li>
+</ul>
+<h2>Execution</h2>
+<ul>
+    <li>Double-click on the provided executable file.</li>
+</ul>
+<h2>Main Features</h2>
+<h3>File Selection</h3>
+<ul>
+    <li>In the graphical interface, three sections are displayed: "Quickbooks Transactions Reports," "Main File," and "TD Bank Transaction Report."</li>
+    <li>In the "Quickbooks Transactions Reports" section, you can select multiple XLSX files (Excel version 2007 or later) by clicking the "Select files" button. Here, you should select all the "Check Positive Pay" reports extracted from Quickbooks that you want to process (one per account).</li>
+    <li>In the "Main File" section, you can select a single XLSX file (Excel version 2007 or later) by clicking the "Select file" button. Here, you will choose the central file that contains the record of verified and pending transactions, etc.</li>
+    <li>In the "TD Bank Transaction Report" section, you can select a single XLSX file (Excel version 2007 or later) or CSV file by clicking the "Select file" button. When the file selection window opens, choose the desired file type at the bottom right of the window.</li>
+    <li>Each of these sections has a button called "info". Clicking on this button will display a brief explanation of each section.</li>
+</ul>
+<h2>File Processing</h2>
+<p>File processing is carried out following the steps described below:</p>
+<h3>File Selection</h3>
+<ul>
+    <li>Select the necessary files and then click the "Start Process" button to initiate the processing.</li>
+</ul>
+<h3>Progress and Messages</h3>
+<ul>
+    <li>During processing, a progress bar will be displayed, providing general information about the ongoing process.</li>
+    <li>At the bottom of the interface, there is a text box that will display relevant messages about the process and the obtained results.</li>
+</ul>
+<h3>Situations during Processing</h3>
+<ol>
+    <li>Duplicate Pending Transaction Detection: During matching of main file pending transactions with Quickbooks report transactions, duplicate transactions may be found.</li>
+    <li>Detection of duplicate bank report transactions: The situation may occur in which the bank report brings with it duplicate transactions.</li>
+    <li>Detection of null or empty transactions: The Quickbooks report may contain transactions without a specified amount.</li>
+    <li>Detection of transactions present in the bank report but with no matches in the Quickbooks reports: If transactions are found in the bank report that do not match any transactions in the Quickbooks reports.</li>
+    <li>NOTE: When these situations are detected, the software exports the transactions involved to specific files. Each of these results is explained in detail in the "Results" section of this manual.</li>
+</ol>
+<h3>Data Processing</h3>
+<p>Below is the cycle executed by the software for data processing:</p>
+<ol>
+    <li>Reading the selected files.</li>
+    <li>Next, the following subprocesses are executed in a loop for each account:</li>
+    <ol>
+        <li>Creation and export of a standardized format for the used reports.</li>
+        <li>Extraction of pending transactions recorded in the central file.</li>
+        <li>Consolidation of pending transactions with transactions from the Quickbooks report.</li>
+        <li>Search for matches between the consolidated transactions and the transactions from the TD Bank report.</li>
+        <li>Exporting files with the obtained results.</li>
+    </ol>
+    <li>Updating and saving the main file.</li>
+</ol>
+<h3>Clearing the Text Box</h3>
+<ul>
+    <li>To clear the content of the text box and the selected files, you can click the "Clean" button located at the bottom of the window.</li>
+</ul>
+<h3>Results</h3>
+<p>The software generates the following results when processing the accounts:</p>
+<h4>"OUTPUT" Folder</h4>
+<p>In the directory where the executable file is located, a folder named "OUTPUT" is created. This folder contains subfolders corresponding to each processed account. Within each folder, three (3) subfolders are generated:</p>
+<h4>"DATA BEFORE PROCESSING" Folder</h4>
+<p>This folder contains exported files that contain raw data. The available files are:</p>
+<ul>
+    <li>"BANK REPORT.xlsx": This file contains the information from the bank report entered in the interface, but in a specific format that only includes the necessary data for the processing of that particular account.</li>
+    <li>"QUICKBOOKS REPORT.xlsx": This file contains the information from the Quickbooks report entered in the interface, but in a specific format that only includes the necessary data for processing.</li>
+    <li>"PENDING TRANSACTIONS BEFORE PROCESSING.xlsx": This file contains the pending transactions before processing. It includes both the transactions from the Quickbooks report and the pending transactions found in the central file. These transactions will be compared to the transactions from the bank report.</li>
+</ul>
+<h4>"PROCESSED DATA" Folder</h4>
+<p>This folder contains exported files with processed data. The available files are:</p>
+<ul>
+    <li>"CONFIRMED TRANSACTIONS.xlsx": This file contains the confirmed transactions, i.e., the pending transactions that found a match in the bank report.</li>
+    <li>"PENDING TRANSACTIONS PROCESSED.xlsx": This file contains the resulting pending transactions, i.e., the transactions that did not find a match in the bank report.</li>
+    <li>"RESULT - TRANSACTIONS PROCESSED.xlsx": This file contains all the processed transactions, both the confirmed transactions and the pending transactions, in a more readable format.</li>
+</ul>
+<h4>"TRANSACTIONS TO REVIEW" Folder</h4>
+<p>This folder contains exported files with processed data that need to be reviewed by the user. The resulting files given the situation are:</p>
+<ul>
+    <li>"DUPLICATE BANK REPORT TRANSACTIONS.xlsx": This file contains the transactions identified as duplicates in the transactions contained in the bank report.</li>
+    <li>"DUPLICATE PENDING TRANSACTIONS.xlsx": This file contains pending transactions identified as duplicates, including information about the origin of each transaction.</li>
+    <li>"VOID TRANSACTIONS.xlsx": This file contains the transactions identified as void, i.e., those that did not have a specified amount.</li>
+    <li>"BANK PENDING TRANSACTIONS.xlsx": This file contains the transactions from the bank report that did not find a match with any pending transaction.</li>
+</ul>
+<h4>Note</h4>
+<ul>
+    <li>Each time data processing is run, all result files from this new process will overwrite the files created in previous processes.</li>
+</ul>
+
+<h4>Main File</h4>
+    <ul>
+        <li>The central file will be updated with the results obtained, inserting the corresponding data in the designated sheets. After processing all the information, the confirmed transactions will be added to the confirmed transactions sheet for the account in question, in the same way as the pending transactions.</li>
+    </ul>
+
+<h2>Additional Notes</h2>
+<ul>
+    <li>It is important to take into consideration that this tool at no time evaluates the transactions that were previously confirmed. This tool works solely and exclusively with the data extracted from the attached files and in the case of the main file, it only extracts and uses the pending transactions that remain in each processing.</li>
+    <li>Ensure that you have the necessary files in the correct format before starting the processing.</li>
+    <li>If you encounter any problems or errors, verify that the selected files are valid and meet the expected requirements.</li>
+</ul>
+</body>
+</html>
