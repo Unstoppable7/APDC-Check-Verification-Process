@@ -277,8 +277,8 @@ def procesar():
         columnas_a_eliminar_bank_report = [1,2,3,4,6,8]  # Índices de las columnas a eliminar
         columnas_extras_a_eliminar = 3 #A partir del este numero se eliminaran
 
+        ##TODO revisar esta logica
         bank_report = bank_report.drop(bank_report.columns[columnas_a_eliminar_bank_report], axis=1)
-
         if bank_report.shape[1] > 3:
             bank_report = bank_report.drop(bank_report.columns[columnas_extras_a_eliminar:], axis=1)
 
